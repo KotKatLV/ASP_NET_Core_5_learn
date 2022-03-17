@@ -18,6 +18,21 @@ namespace Rocky.Migrations
                 .HasAnnotation("ProductVersion", "5.0.15")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Rocky.Models.ApplicationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ApplicationType");
+                });
+
             modelBuilder.Entity("Rocky.Models.Category", b =>
                 {
                     b.Property<int>("Id")
