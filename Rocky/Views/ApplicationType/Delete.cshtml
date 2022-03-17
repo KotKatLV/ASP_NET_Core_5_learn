@@ -1,10 +1,10 @@
 ﻿@model Rocky.Models.ApplicationType
 
-<form method="post">
+<form method="post" asp-action="DeletePost">
     <input asp-for="Id" hidden />
     <div class=border-bottom p-3>
         <div class="flex-row row">
-            <h2 class="text-info pl-3">Edit application type</h2>
+            <h2 class="text-info pl-3">Delete application type</h2>
         </div>
         <div class="border p-3">
             <div class="row">
@@ -14,17 +14,16 @@
                             <label asp-for="Name"></label>
                         </div>
                         <div class="col-8">
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <input asp-for="Name" disabled class="form-control" />
                         </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-8 offset-4 row">
                             <div class="col">
-                                <input type="submit" class="btn btn-info w-100" value="Update" />
+                                <input type="submit" class="btn btn-danger w-100" value="Delete" />
                             </div>
                             <div class="col">
-                                <a asp-action="Index" class="btn btn-success w-100"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+                                <a asp-controller="ApplicationType" asp-action="Index" class="btn btn-success w-100"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
                             </div>
                         </div>
                     </div>
