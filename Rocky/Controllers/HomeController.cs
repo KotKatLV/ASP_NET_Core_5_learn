@@ -43,5 +43,16 @@ namespace Rocky.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        public IActionResult Details(int productId)
+        {
+            DetailsViewModel detailsViewModel = new DetailsViewModel()
+            {
+                Product = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType).Where(u => u.Id == productId).FirstOrDefault(),
+                ExistsInCart = false
+            };
+
+            return View(detailsViewModel);
+        }
     }
 }
