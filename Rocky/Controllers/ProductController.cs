@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Rocky.Data;
 using Rocky.Models;
 using Rocky.VIewModels;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Rocky.Controllers
@@ -11,10 +15,12 @@ namespace Rocky.Controllers
     public class ProductController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(ApplicationDbContext db)
+        public ProductController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment)
         {
             _db = db;
+            _webHostEnvironment = webHostEnvironment;   
         }
 
         public IActionResult Index()
@@ -24,6 +30,7 @@ namespace Rocky.Controllers
             foreach (var product in productList)
             {
                 product.Category = _db.Category.FirstOrDefault(c => c.Id == product.CategoryId);
+                product.ApplicationType = _db.ApplicationType.FirstOrDefault(c => c.Id == product.ApplicationTypeId);
             }
 
             return View(productList);
@@ -40,7 +47,12 @@ namespace Rocky.Controllers
                 {
                     Text = c.Name,
                     Value = c.Id.ToString()
-                })
+                }),
+                ApplicationTypeDropDownList = _db.ApplicationType.Select(a => new SelectListItem
+                {
+                    Text = a.Name,
+                    Value = a.Id.ToString()
+                }),
             };
 
             if (id == null)
@@ -63,15 +75,70 @@ namespace Rocky.Controllers
         // POST - UPSERT
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpSert(Category category)
+        public IActionResult UpSert(ProductViewModel productViewModel)
         {
             if (ModelState.IsValid)
             {
-                _db.Category.Add(category);
+                var files = HttpContext.Request.Form.Files;
+                string webRootPath = _webHostEnvironment.WebRootPath;
+
+                if (productViewModel.Product.Id == 0)
+                {
+                    string upload = webRootPath + WC.ImagePath;
+                    string fileName = Guid.NewGuid().ToString();
+                    string extension = Path.GetExtension(files[0].FileName);
+
+                    using (var fileStream = new FileStream(Path.Combine(upload, fileName + extension), FileMode.Create))
+                    {
+                        files[0].CopyTo(fileStream);
+                    }
+
+                    productViewModel.Product.Image = fileName + extension;
+                    _db.Product.Add(productViewModel.Product);
+                }
+                else
+                {
+                    var objFromDb = _db.Product.AsNoTracking().FirstOrDefault(x => x.Id == productViewModel.Product.Id);
+
+                    if (files.Count > 0)
+                    {
+                        string upload = webRootPath + WC.ImagePath;
+                        string fileName = Guid.NewGuid().ToString();
+                        string extension = Path.GetExtension(files[0].FileName);
+
+                        var oldFile = Path.Combine(upload, objFromDb.Image);
+
+                        if (System.IO.File.Exists(oldFile))
+                        {
+                            System.IO.File.Delete(oldFile);
+                        }
+
+                        using (var fileStream = new FileStream(Path.Combine(upload, fileName + extension), FileMode.Create))
+                        {
+                            files[0].CopyTo(fileStream);
+                        }
+
+                        productViewModel.Product.Image = fileName + extension;
+                    }
+                    else
+                    {
+                        productViewModel.Product.Image = objFromDb.Image;
+                    }
+
+                    _db.Product.Update(productViewModel.Product);
+                }
+
                 _db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(category);
+
+            productViewModel.CategoryDropDownList = _db.Category.Select(c => new SelectListItem
+            {
+                Text = c.Name,
+                Value = c.Id.ToString()
+            });
+
+            return View(productViewModel);
         }
 
         // GET - DELETE
@@ -83,29 +150,40 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var obj = _db.Category.Find(id);
+            var product = _db.Product
+                .Include(u => u.Category)
+                .Include(p => p.ApplicationType)
+                .FirstOrDefault();
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
+        // POST - DELETE
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeletePost(int? id)
+        {
+            var obj = _db.Product.Find(id);
 
             if (obj == null)
             {
                 return NotFound();
             }
 
-            return View(obj);
-        }
+            string upload = _webHostEnvironment.WebRootPath + WC.ImagePath;
+            var oldFile = Path.Combine(upload, obj.Image);
 
-        // POST - DELETE
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
-        {
-            var category = _db.Category.Find(id);
-
-            if(category == null)
+            if (System.IO.File.Exists(oldFile))
             {
-                return NotFound();
+                System.IO.File.Delete(oldFile);
             }
 
-            _db.Category.Remove(category);
+            _db.Product.Remove(obj);
             _db.SaveChanges();
             return RedirectToAction("Index");
         }

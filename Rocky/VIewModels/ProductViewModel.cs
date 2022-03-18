@@ -9,5 +9,7 @@ namespace Rocky.VIewModels
         public Product Product { get; set; }
 
         public IEnumerable<SelectListItem> CategoryDropDownList { get; set; }
+
+        public IEnumerable<SelectListItem> ApplicationTypeDropDownList { get; set; }
     }
 }
