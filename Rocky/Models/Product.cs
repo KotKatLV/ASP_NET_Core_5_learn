@@ -11,9 +11,11 @@ namespace Rocky.Models
         [Required]
         public string Name { get; set; }
 
+        public string ShortDescription { get; set; }
+
         public string Description { get; set; }
 
-        [Range(1, int.MaxValue)]
+        [Range(1, double.MaxValue)]
         public decimal Price { get; set; }
 
         public string Image { get; set; }

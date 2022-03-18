@@ -25,14 +25,7 @@ namespace Rocky.Controllers
 
         public IActionResult Index()
         {
-            IEnumerable<Product> productList= _db.Product;
-
-            foreach (var product in productList)
-            {
-                product.Category = _db.Category.FirstOrDefault(c => c.Id == product.CategoryId);
-                product.ApplicationType = _db.ApplicationType.FirstOrDefault(c => c.Id == product.ApplicationTypeId);
-            }
-
+            IEnumerable<Product> productList = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType);
             return View(productList);
         }
 
