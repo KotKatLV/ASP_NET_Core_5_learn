@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Rocky.Data;
 using Rocky.Models;
+using Rocky.VIewModels;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -31,22 +33,30 @@ namespace Rocky.Controllers
         [HttpGet]
         public IActionResult UpSert(int? id)
         {
-            Product product = new Product();
+            ProductViewModel productViewModel = new ProductViewModel()
+            {
+                Product = new Product(),
+                CategoryDropDownList = _db.Category.Select(c => new SelectListItem
+                {
+                    Text = c.Name,
+                    Value = c.Id.ToString()
+                })
+            };
 
             if (id == null)
             {
-                return View(product);
+                return View(productViewModel);
             }
             else
             {
-                product = _db.Product.Find(id);
+                productViewModel.Product = _db.Product.Find(id);
 
-                if (product == null)
+                if (productViewModel.Product == null)
                 {
                     return NotFound();
                 }
 
-                return View(product);
+                return View(productViewModel);
             }
         }
 
