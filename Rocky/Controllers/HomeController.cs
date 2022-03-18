@@ -27,7 +27,7 @@ namespace Rocky.Controllers
         {
             HomeViewModel homeViewModel = new HomeViewModel
             {
-                Products = _db.Product.Include(u => u.Category).Include(u => u.ApplicationTypeId),
+                Products = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType),
                 Categories = _db.Category
             }; 
             return View(homeViewModel);
