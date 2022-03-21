@@ -29,14 +29,21 @@ namespace Rocky
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddDefaultTokenProviders()
+                .AddDefaultUI()
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
             services.AddHttpContextAccessor();
+
             services.AddSession(Options =>
             {
                 Options.IdleTimeout = TimeSpan.FromMinutes(10);
                 Options.Cookie.HttpOnly = true;
                 Options.Cookie.IsEssential = true;
             });
+
             services.AddControllersWithViews();
         }
 
