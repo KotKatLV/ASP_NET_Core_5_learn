@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Rocky.Data;
 using Rocky.Models;
-using Rocky.VIewModels;
+using Rocky.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;

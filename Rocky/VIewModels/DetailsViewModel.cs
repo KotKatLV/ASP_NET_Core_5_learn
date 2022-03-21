@@ -1,6 +1,6 @@
 ﻿using Rocky.Models;
 
-namespace Rocky.VIewModels
+namespace Rocky.ViewModels
 {
     public class DetailsViewModel
     {

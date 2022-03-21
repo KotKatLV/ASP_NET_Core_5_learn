@@ -1,7 +1,7 @@
 ﻿using Rocky.Models;
 using System.Collections.Generic;
 
-namespace Rocky.VIewModels
+namespace Rocky.ViewModels
 {
     public class HomeViewModel
     {

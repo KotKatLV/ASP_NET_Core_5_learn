@@ -3,12 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Rocky.Data;
 using Rocky.Models;
-using Rocky.VIewModels;
-using System;
-using System.Collections.Generic;
+using Rocky.ViewModels;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Rocky.Controllers
 {
@@ -44,11 +41,11 @@ namespace Rocky.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult Details(int productId)
+        public IActionResult Details(int id)
         {
             DetailsViewModel detailsViewModel = new DetailsViewModel()
             {
-                Product = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType).Where(u => u.Id == productId).FirstOrDefault(),
+                Product = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType).Where(u => u.Id == id).FirstOrDefault(),
                 ExistsInCart = false
             };
 
