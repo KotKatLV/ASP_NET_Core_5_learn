@@ -1,0 +1,17 @@
+﻿using Rocky.Models;
+using System.Collections.Generic;
+
+namespace Rocky.ViewModels
+{
+    public class ProductUserViewModel
+    {
+        public ProductUserViewModel()
+        {
+            ProductList = new List<Product>();
+        }
+
+        public ApplicationUser ApplicationUser { get; set; }
+
+        public IEnumerable<Product> ProductList { get; set; }
+    }
+}
