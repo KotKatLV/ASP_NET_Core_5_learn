@@ -29,6 +29,13 @@ namespace Rocky
             options.UseSqlServer(
                 Configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddHttpContextAccessor();
+            services.AddSession(Options =>
+            {
+                Options.IdleTimeout = TimeSpan.FromMinutes(10);
+                Options.Cookie.HttpOnly = true;
+                Options.Cookie.IsEssential = true;
+            });
             services.AddControllersWithViews();
         }
 
@@ -52,7 +59,7 @@ namespace Rocky
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
