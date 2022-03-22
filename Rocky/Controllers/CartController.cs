@@ -1,13 +1,18 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Rocky.Data;
 using Rocky.Models;
 using Rocky.Utils;
 using Rocky.ViewModels;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Rocky.Controllers
 {
@@ -15,13 +20,17 @@ namespace Rocky.Controllers
     public class CartController : Controller
     {
         private readonly ApplicationDbContext _db;
-        
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IEmailSender _emailSender;
+
         [BindProperty]
         public ProductUserViewModel ProductUserViewModel { get; set; }
 
-        public CartController(ApplicationDbContext db)
+        public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
         {
             _db = db;
+            _webHostEnvironment = webHostEnvironment;   
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -48,6 +57,7 @@ namespace Rocky.Controllers
             return RedirectToAction(nameof(Summary));
         }
 
+        [HttpGet]
         public IActionResult Summary()
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
@@ -69,10 +79,47 @@ namespace Rocky.Controllers
             ProductUserViewModel = new ProductUserViewModel
             {
                 ApplicationUser = _db.ApplicationUser.FirstOrDefault(u => u.Id == claim.Value),
-                ProductList = productList,
+                ProductList = productList.ToList(),
             };
 
             return View(ProductUserViewModel);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Summary")]
+        public async Task<IActionResult> SummaryPostAsync(ProductUserViewModel productUserViewModel)
+        {
+            var pathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "templates" + Path.DirectorySeparatorChar.ToString() + "Inquiry.html";
+            var subject = "New Inquiry";
+            string htmlBody = "";
+            using (StreamReader sr = System.IO.File.OpenText(pathToTemplate))
+            {
+                htmlBody = sr.ReadToEnd();
+            }
+
+            StringBuilder productListSB = new StringBuilder();
+            foreach (var prod in productUserViewModel.ProductList)
+            {
+                productListSB.Append($" - Name: {prod.Name} <span style='font-size 14px'>(ID: {prod.Id})</span> <br />");
+            }
+
+            string messageBody = string.Format(htmlBody,
+                productUserViewModel.ApplicationUser.FullName,
+                productUserViewModel.ApplicationUser.Email,
+                productUserViewModel.ApplicationUser.PhoneNumber,
+                productListSB.ToString());
+
+            await _emailSender.SendEmailAsync(WC.AdminEmail, subject, messageBody);
+
+            return RedirectToAction(nameof(InquiryConfirmation));
+        }
+
+        public IActionResult InquiryConfirmation(ProductUserViewModel productUserViewModel)
+        {
+            HttpContext.Session.Clear();
+            return View();
         }
 
         public IActionResult Remove(int id)
