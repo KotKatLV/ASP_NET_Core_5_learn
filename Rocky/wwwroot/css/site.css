@@ -62,6 +62,11 @@ body {
   /* Margin bottom by footer height */
   margin-bottom: 60px;
 }
+
+.embed-responsive .card-img-top {
+    object-fit: cover;
+}
+
 .footer {
   position: absolute;
   bottom: 0;

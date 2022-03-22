@@ -8,7 +8,7 @@ namespace Rocky.Models
         public int Id { get; set; }
 
         [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Application type must be greater than zero")]
+        [StringLength(100, MinimumLength = 2)]
 
         public string Name { get; set; }
     }
