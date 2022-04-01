@@ -3,14 +3,14 @@
 
 <form method="post">
     <input asp-for="Id" hidden />
-    <div class=border-bottom p-3>
+    <div class="border-bottom p-3 bg-white">
         <div class="flex-row row">
             <h2 class="text-info pl-3">Delete product</h2>
         </div>
         <div class="border p-3">
             <div class="row">
                 <div class="col-8">
-                    <div class="form-group row">
+                    <div class="form-group row py-2">
                         <div class="col-4">
                             <label asp-for="Name"></label>
                         </div>
@@ -18,7 +18,7 @@
                             <input asp-for="Name" disabled class="form-control" />
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row py-2">
                         <div class="col-4">
                             <label asp-for="Price"></label>
                         </div>
@@ -26,7 +26,7 @@
                             <input asp-for="Price" disabled class="form-control" />
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row py-2">
                         <div class="col-4">
                             <label asp-for="Description"></label>
                         </div>
@@ -34,7 +34,7 @@
                             <textarea asp-for="Description" class="form-control summernote" disabled></textarea>
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row py-2">
                         <div class="col-4">
                             <label asp-for=CategoryId></label>
                         </div>
@@ -42,7 +42,7 @@
                             <input asp-for="Category.Name" disabled class="form-control" />
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row py-2">
                         <div class="col-4">
                             <label asp-for=ApplicationTypeId></label>
                         </div>
@@ -50,7 +50,7 @@
                             <input asp-for="ApplicationType.Name" disabled class="form-control" />
                         </div>
                     </div>
-                    <div class="form-group row">
+                    <div class="form-group row py-2">
                         <div class="col-8 offset-4 row">
                             <div class="col">
                                 <input type="submit" class="btn btn-danger w-100" value="Delete" />

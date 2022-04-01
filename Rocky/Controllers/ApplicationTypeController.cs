@@ -1,25 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Rocky.DAL;
+using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.Utils;
-using System.Collections.Generic;
+using System.Linq;
 
 namespace Rocky.Controllers
 {
     [Authorize(Roles = WC.AdminRole)]
     public class ApplicationTypeController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IApplicationTypeRepository _appTypeRepository;
 
-        public ApplicationTypeController(ApplicationDbContext db)
+        public ApplicationTypeController(IApplicationTypeRepository repository)
         {
-            _db = db;
+            _appTypeRepository = repository;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<ApplicationType> applicationTypes = _db.ApplicationType;
+            IQueryable<ApplicationType> applicationTypes = _appTypeRepository.GetAll();
             return View(applicationTypes);
         }
         
@@ -40,8 +40,8 @@ namespace Rocky.Controllers
                 return View(applicationType);
             }
 
-            _db.ApplicationType.Add(applicationType);
-            _db.SaveChanges();
+            _appTypeRepository.Add(applicationType);
+            _appTypeRepository.Save();
             return RedirectToAction("Index");
         }
 
@@ -54,7 +54,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var appType = _db.ApplicationType.Find(id);
+            var appType = _appTypeRepository.GetById(id.GetValueOrDefault());
 
             if (appType == null)
             {
@@ -74,8 +74,8 @@ namespace Rocky.Controllers
                 return View(applicationType);
             }
 
-            _db.ApplicationType.Update(applicationType);
-            _db.SaveChanges();
+            _appTypeRepository.Update(applicationType);
+            _appTypeRepository.Save();
             return RedirectToAction("Index");
         }
 
@@ -88,7 +88,7 @@ namespace Rocky.Controllers
                 return NotFound();
             }
 
-            var appType = _db.ApplicationType.Find(id);
+            var appType = _appTypeRepository.GetById(id.GetValueOrDefault());
 
             if (appType == null)
             {
@@ -102,15 +102,15 @@ namespace Rocky.Controllers
         [HttpPost]
         public IActionResult DeletePost(int? id)
         {
-            var appType = _db.ApplicationType.Find(id);
+            var appType = _appTypeRepository.GetById(id.GetValueOrDefault());
 
             if (appType == null)
             {
                 return NotFound();
             }
 
-            _db.ApplicationType.Remove(appType);
-            _db.SaveChanges();
+            _appTypeRepository.Remove(appType);
+            _appTypeRepository.Save();
             return RedirectToAction("Index");
         }
     }
