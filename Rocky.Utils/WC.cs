@@ -9,5 +9,8 @@
         public const string CustomerRole = "Customer";
 
         public static string AdminEmail = "kotkat.lv@gmail.com";
+
+        public static string CategoryName = "Category";
+        public static string ApplicationTypeName = "ApplicationType";
     }
 }
