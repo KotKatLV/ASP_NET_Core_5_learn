@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Rocky.Data;
+using Rocky.DAL;
 using Rocky.Utils;
 using System;
 using System.Collections.Generic;

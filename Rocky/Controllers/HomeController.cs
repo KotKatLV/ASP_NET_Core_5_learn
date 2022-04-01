@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Rocky.Data;
-using Rocky.Models;
+using Rocky.DAL;
+using Rocky.Domain;
 using Rocky.Utils;
 using Rocky.ViewModels;
 using System.Collections.Generic;

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Rocky.Data;
-using Rocky.Models;
+using Rocky.DAL;
+using Rocky.Domain;
+using Rocky.Utils;
 using System.Collections.Generic;
 
 namespace Rocky.Controllers

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Rocky.Models;
+using Rocky.Domain;
 using System.Collections.Generic;
 
 namespace Rocky.ViewModels
