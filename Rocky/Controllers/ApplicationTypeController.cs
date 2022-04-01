@@ -111,7 +111,7 @@ namespace Rocky.Controllers
 
             _appTypeRepository.Remove(appType);
             _appTypeRepository.Save();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index"); 
         }
     }
 }
