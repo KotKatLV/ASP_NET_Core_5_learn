@@ -14,5 +14,9 @@ namespace Rocky.DAL
         public DbSet<Product> Product { get; set; }
 
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
+
+        public DbSet<InquiryHeader> InquiryHeader { get; set; }
+
+        public DbSet<InquiryDetails> InquiryDetail { get; set; }
     }
 }

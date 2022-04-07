@@ -9,13 +9,13 @@ namespace Rocky.Domain
         public int Id { get; set; }
 
         [Required]
-        public string InquiryHeaderId { get; set; }
+        public int InquiryHeaderId { get; set; }
 
         [ForeignKey("InquiryHeaderId")]
         public InquiryHeader InquiryHeader { get; set; }
 
         [Required]
-        public string ProductId { get; set; }
+        public int ProductId { get; set; }
         [Required]
         [ForeignKey("ProductId")]
         public Product Product { get; set; }
