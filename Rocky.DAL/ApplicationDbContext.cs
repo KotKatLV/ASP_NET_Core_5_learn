@@ -17,6 +17,6 @@ namespace Rocky.DAL
 
         public DbSet<InquiryHeader> InquiryHeader { get; set; }
 
-        public DbSet<InquiryDetails> InquiryDetail { get; set; }
+        public DbSet<InquiryDetail> InquiryDetail { get; set; }
     }
 }
