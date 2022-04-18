@@ -2,7 +2,7 @@
 
 namespace Rocky.DAL.Repository.Interfaces
 {
-    public interface IInquiryDetailRepository
+    public interface IInquiryDetailRepository : IRepository<InquiryDetail>
     {
         void Update(InquiryDetail entity);
     }

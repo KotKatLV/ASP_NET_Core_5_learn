@@ -7,6 +7,7 @@ namespace Rocky.DAL
     public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
         public DbSet<Category> Category { get; set; }
 
         public DbSet<ApplicationType> ApplicationType { get; set; }
@@ -18,5 +19,6 @@ namespace Rocky.DAL
         public DbSet<InquiryHeader> InquiryHeader { get; set; }
 
         public DbSet<InquiryDetail> InquiryDetail { get; set; }
+
     }
 }

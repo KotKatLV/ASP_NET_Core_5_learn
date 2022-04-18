@@ -28,7 +28,7 @@ namespace Rocky.Controllers
         {
             HomeViewModel homeViewModel = new HomeViewModel
             {
-                Products = _productRepository.GetAll(includProps: "Category, ApplicationType"),
+                Products = _productRepository.GetAll(includProps: "Category,ApplicationType"),
                 Categories = _categoryRepository.GetAll()
             }; 
             return View(homeViewModel);
@@ -56,7 +56,7 @@ namespace Rocky.Controllers
 
             DetailsViewModel detailsViewModel = new DetailsViewModel()
             {
-                Product = _productRepository.FirstOrDefault(filter: u => u.Id == id, includProps: "Category, ApplicationType"),
+                Product = _productRepository.FirstOrDefault(filter: u => u.Id == id, includProps: "Category,ApplicationType"),
                 ExistsInCart = false
             };
 

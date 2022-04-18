@@ -7,6 +7,7 @@ using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.Utils;
 using Rocky.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -99,6 +100,9 @@ namespace Rocky.Controllers
         [ActionName("Summary")]
         public async Task<IActionResult> SummaryPostAsync(ProductUserViewModel productUserViewModel)
         {
+            var clainsIdentity = (ClaimsIdentity)User.Identity;
+            var claim = clainsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
             var pathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "templates" + Path.DirectorySeparatorChar.ToString() + "Inquiry.html";
             var subject = "New Inquiry";
             string htmlBody = "";
@@ -121,6 +125,31 @@ namespace Rocky.Controllers
 
             await _emailSender.SendEmailAsync(WC.AdminEmail, subject, messageBody);
 
+            InquiryHeader inquiryHeader = new InquiryHeader()
+            {
+                ApplicationUserId = claim.Value,
+                FullName = productUserViewModel.ApplicationUser.FullName,
+                Email = productUserViewModel.ApplicationUser.Email,
+                PhoneNumber = productUserViewModel.ApplicationUser.PhoneNumber,
+                InquiryDate = DateTime.Now
+            };
+
+            _inquiryHeaderRepository.Add(inquiryHeader);
+            _inquiryHeaderRepository.Save();
+
+            foreach (var prod in ProductUserViewModel.ProductList)
+            {
+                InquiryDetail inquiryDetail = new InquiryDetail()
+                {
+                    InquiryHeaderId = inquiryHeader.Id,
+                    ProductId = prod.Id
+                };
+
+                _inquiryDetailRepository.Add(inquiryDetail);
+
+            }
+
+            _inquiryDetailRepository.Save();
             return RedirectToAction(nameof(InquiryConfirmation));
         }
 
