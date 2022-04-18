@@ -1,10 +1,5 @@
 ﻿using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rocky.DAL.Repository
 {

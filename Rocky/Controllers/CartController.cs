@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Rocky.DAL;
+using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.Utils;
 using Rocky.ViewModels;
@@ -19,32 +19,40 @@ namespace Rocky.Controllers
     [Authorize]
     public class CartController : Controller
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IProductRepository _productRepository;
+        private readonly IApplicationTypeRepository _applicationTypeRepository;
+        private readonly IApplicationUserRepository _applicationUserRepository;
+        private readonly IInquiryHeaderRepository _inquiryHeaderRepository;
+        private readonly IInquiryDetailRepository _inquiryDetailRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IEmailSender _emailSender;
 
         [BindProperty]
         public ProductUserViewModel ProductUserViewModel { get; set; }
 
-        public CartController(ApplicationDbContext db, IWebHostEnvironment webHostEnvironment, IEmailSender emailSender)
+        public CartController(IWebHostEnvironment webHostEnvironment, IEmailSender emailSender, IProductRepository productRepository, IApplicationTypeRepository applicationTypeRepository, IApplicationUserRepository applicationUserRepository, IInquiryDetailRepository inquiryDetailRepository, IInquiryHeaderRepository inquiryHeaderRepository)
         {
-            _db = db;
-            _webHostEnvironment = webHostEnvironment;   
+            _productRepository = productRepository;
+            _applicationTypeRepository = applicationTypeRepository;
+            _applicationUserRepository = applicationUserRepository;
+            _inquiryDetailRepository = inquiryDetailRepository;
+            _inquiryHeaderRepository = inquiryHeaderRepository;
+            _webHostEnvironment = webHostEnvironment;
             _emailSender = emailSender;
         }
 
         public IActionResult Index()
         {
             List<ShoppingCart> shoppingCarts = new List<ShoppingCart>();
-            if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null 
-                && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
+            if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
+                && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Any())
             {
                 // session exists
                 shoppingCarts = HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).ToList();
             }
 
             List<int> prodInCart = shoppingCarts.Select(p => p.ProductId).ToList();
-            IEnumerable<Product> productList = _db.Product.Where(p => prodInCart.Contains(p.Id));
+            IEnumerable<Product> productList = _productRepository.GetAll(p => prodInCart.Contains(p.Id));
 
             return View(productList);
         }
@@ -67,18 +75,18 @@ namespace Rocky.Controllers
 
             List<ShoppingCart> shoppingCarts = new List<ShoppingCart>();
             if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
-                && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Count() > 0)
+                && HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).Any())
             {
                 // session exists
                 shoppingCarts = HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart).ToList();
             }
 
             List<int> prodInCart = shoppingCarts.Select(p => p.ProductId).ToList();
-            IEnumerable<Product> productList = _db.Product.Where(p => prodInCart.Contains(p.Id));
+            IEnumerable<Product> productList = _productRepository.GetAll(p => prodInCart.Contains(p.Id));
 
             ProductUserViewModel = new ProductUserViewModel
             {
-                ApplicationUser = _db.ApplicationUser.FirstOrDefault(u => u.Id == claim.Value),
+                ApplicationUser = _applicationUserRepository.FirstOrDefault(u => u.Id == claim.Value),
                 ProductList = productList.ToList(),
             };
 
@@ -135,7 +143,7 @@ namespace Rocky.Controllers
             shoppingCarts.Remove(shoppingCarts.FirstOrDefault(u => u.ProductId == id));
 
             List<int> prodInCart = shoppingCarts.Select(p => p.ProductId).ToList();
-            IEnumerable<Product> productList = _db.Product.Where(p => prodInCart.Contains(p.Id));
+            IEnumerable<Product> productList = _productRepository.GetAll(p => prodInCart.Contains(p.Id));
             HttpContext.Session.Set(WC.SessionCart, shoppingCarts);
             return RedirectToAction(nameof(Index));
         }

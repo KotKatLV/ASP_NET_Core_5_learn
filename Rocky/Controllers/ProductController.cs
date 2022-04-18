@@ -1,15 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Rocky.DAL;
 using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.Utils;
 using Rocky.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 

@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Rocky.DAL;
+using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.Utils;
 using Rocky.ViewModels;
@@ -14,21 +13,23 @@ namespace Rocky.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _db;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext db)
+        public HomeController(ILogger<HomeController> logger, IProductRepository productRepository, ICategoryRepository categoryRepository)
         {
             _logger = logger;
-            _db = db;   
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public IActionResult Index()
         {
             HomeViewModel homeViewModel = new HomeViewModel
             {
-                Products = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType),
-                Categories = _db.Category
+                Products = _productRepository.GetAll(includProps: "Category, ApplicationType"),
+                Categories = _categoryRepository.GetAll()
             }; 
             return View(homeViewModel);
         }
@@ -55,7 +56,7 @@ namespace Rocky.Controllers
 
             DetailsViewModel detailsViewModel = new DetailsViewModel()
             {
-                Product = _db.Product.Include(u => u.Category).Include(u => u.ApplicationType).Where(u => u.Id == id).FirstOrDefault(),
+                Product = _productRepository.FirstOrDefault(filter: u => u.Id == id, includProps: "Category, ApplicationType"),
                 ExistsInCart = false
             };
 
