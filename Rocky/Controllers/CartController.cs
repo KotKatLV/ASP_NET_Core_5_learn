@@ -53,7 +53,15 @@ namespace Rocky.Controllers
             }
 
             List<int> prodInCart = shoppingCarts.Select(p => p.ProductId).ToList();
-            IEnumerable<Product> productList = _productRepository.GetAll(p => prodInCart.Contains(p.Id));
+            IEnumerable<Product> productListTmp = _productRepository.GetAll(p => prodInCart.Contains(p.Id));
+            IList<Product> productList = new List<Product>();
+
+            foreach (var cartObj in shoppingCarts)
+            {
+                Product product = productListTmp.FirstOrDefault(u => u.Id == cartObj.ProductId);
+                product.TempSqFt = cartObj.SqFt;
+                productList.Add(product);
+            }
 
             return View(productList);
         }
