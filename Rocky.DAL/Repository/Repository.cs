@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Rocky.DAL.Repository.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -85,6 +86,11 @@ namespace Rocky.DAL.Repository
         public void Remove(T entity)
         {
             dbSet.Remove(entity);
+        }
+
+        public void RemoveRange(IEnumerable<T> entity)
+        {
+            dbSet.RemoveRange(entity);
         }
 
         public void Save()

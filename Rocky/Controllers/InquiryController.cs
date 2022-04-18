@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.UI.Web.ViewModels;
@@ -7,6 +8,7 @@ using System.Collections.Generic;
 
 namespace Rocky.UI.Web.Controllers
 {
+    [Authorize(WC.AdminRole)]
     public class InquiryController : Controller
     {
         private readonly IInquiryHeaderRepository _inquiryHeaderRepository;
@@ -59,6 +61,18 @@ namespace Rocky.UI.Web.Controllers
             HttpContext.Session.Set(WC.SessionInquiryId, InquiryViewModel.InquiryHeader.Id);
 
             return RedirectToAction("Index", "Cart");
+        }
+
+        [HttpPost]
+        public IActionResult Delete()
+        {
+            InquiryHeader inquiryHeader = _inquiryHeaderRepository.FirstOrDefault(u => u.Id == InquiryViewModel.InquiryHeader.Id);
+            IEnumerable<InquiryDetail> inquiryDetails = _inquiryDetailRepository.GetAll(u => u.InquiryHeaderId == InquiryViewModel.InquiryHeader.Id);
+            _inquiryDetailRepository.RemoveRange(inquiryDetails);
+            _inquiryHeaderRepository.Remove(inquiryHeader);
+            _inquiryHeaderRepository.Save();
+
+            return RedirectToAction(nameof(Index));
         }
 
         #region API CALLS
