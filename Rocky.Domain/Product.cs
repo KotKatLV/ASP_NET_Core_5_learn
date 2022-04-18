@@ -31,5 +31,9 @@ namespace Rocky.Domain
 
         [ForeignKey("ApplicationTypeId")]
         public virtual ApplicationType ApplicationType { get; set; }
+
+        [NotMapped]
+        [Range(1, 1000)]
+        public int TempSqFt { get; set; } = 1;
     }
 }

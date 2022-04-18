@@ -1,0 +1,22 @@
+﻿@using Rocky.Utils
+
+@if(TempData[WC.SuccessNotification] != null)
+{
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script type="text/javascript">
+        toastr.success('@TempData[WC.SuccessNotification]');
+    </script>
+}
+
+
+@if(TempData[WC.ErrorNotification] != null)
+{
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script type="text/javascript">
+        toastr.error('@TempData[WC.ErrorNotification]');
+    </script>
+}
