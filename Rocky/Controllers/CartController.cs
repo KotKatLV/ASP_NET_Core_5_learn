@@ -25,13 +25,15 @@ namespace Rocky.Controllers
         private readonly IApplicationUserRepository _applicationUserRepository;
         private readonly IInquiryHeaderRepository _inquiryHeaderRepository;
         private readonly IInquiryDetailRepository _inquiryDetailRepository;
+        private readonly IOrderHeaderRepository _orderHeaderRepository;
+        private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IEmailSender _emailSender;
 
         [BindProperty]
         public ProductUserViewModel ProductUserViewModel { get; set; }
 
-        public CartController(IWebHostEnvironment webHostEnvironment, IEmailSender emailSender, IProductRepository productRepository, IApplicationTypeRepository applicationTypeRepository, IApplicationUserRepository applicationUserRepository, IInquiryDetailRepository inquiryDetailRepository, IInquiryHeaderRepository inquiryHeaderRepository)
+        public CartController(IWebHostEnvironment webHostEnvironment, IEmailSender emailSender, IProductRepository productRepository, IApplicationTypeRepository applicationTypeRepository, IApplicationUserRepository applicationUserRepository, IInquiryDetailRepository inquiryDetailRepository, IInquiryHeaderRepository inquiryHeaderRepository, IOrderDetailRepository orderDetailRepository, IOrderHeaderRepository orderHeaderRepository)
         {
             _productRepository = productRepository;
             _applicationTypeRepository = applicationTypeRepository;
@@ -40,6 +42,8 @@ namespace Rocky.Controllers
             _inquiryHeaderRepository = inquiryHeaderRepository;
             _webHostEnvironment = webHostEnvironment;
             _emailSender = emailSender;
+            _orderDetailRepository = orderDetailRepository;
+            _orderHeaderRepository = orderHeaderRepository;
         }
 
         public IActionResult Index()
@@ -149,53 +153,99 @@ namespace Rocky.Controllers
             var clainsIdentity = (ClaimsIdentity)User.Identity;
             var claim = clainsIdentity.FindFirst(ClaimTypes.NameIdentifier);
 
-            var pathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "templates" + Path.DirectorySeparatorChar.ToString() + "Inquiry.html";
-            var subject = "New Inquiry";
-            string htmlBody = "";
-            using (StreamReader sr = System.IO.File.OpenText(pathToTemplate))
+            if (User.IsInRole(WC.AdminRole))
             {
-                htmlBody = sr.ReadToEnd();
-            }
-
-            StringBuilder productListSB = new StringBuilder();
-            foreach (var prod in productUserViewModel.ProductList)
-            {
-                productListSB.Append($" - Name: {prod.Name} <span style='font-size 14px'>(ID: {prod.Id})</span> <br />");
-            }
-
-            string messageBody = string.Format(htmlBody,
-                productUserViewModel.ApplicationUser.FullName,
-                productUserViewModel.ApplicationUser.Email,
-                productUserViewModel.ApplicationUser.PhoneNumber,
-                productListSB.ToString());
-
-            await _emailSender.SendEmailAsync(WC.AdminEmail, subject, messageBody);
-
-            InquiryHeader inquiryHeader = new InquiryHeader()
-            {
-                ApplicationUserId = claim.Value,
-                FullName = productUserViewModel.ApplicationUser.FullName,
-                Email = productUserViewModel.ApplicationUser.Email,
-                PhoneNumber = productUserViewModel.ApplicationUser.PhoneNumber,
-                InquiryDate = DateTime.Now
-            };
-
-            _inquiryHeaderRepository.Add(inquiryHeader);
-            _inquiryHeaderRepository.Save();
-
-            foreach (var prod in ProductUserViewModel.ProductList)
-            {
-                InquiryDetail inquiryDetail = new InquiryDetail()
+                var orderTotal = 0.0m;
+                foreach (var prod in ProductUserViewModel.ProductList)
                 {
-                    InquiryHeaderId = inquiryHeader.Id,
-                    ProductId = prod.Id
+                    orderTotal += prod.Price + prod.TempSqFt;
+                }
+
+                OrderHeader orderHeader = new OrderHeader()
+                {
+                    CreatedByUserId = claim.Value,
+                    FinalOrderTotal = (double)orderTotal,
+                    City = ProductUserViewModel.ApplicationUser.City,
+                    StreetAddress = ProductUserViewModel.ApplicationUser.StreetAddress,
+                    State = ProductUserViewModel.ApplicationUser.State,
+                    PostalCode = ProductUserViewModel.ApplicationUser.PostalCode,
+                    FullName = ProductUserViewModel.ApplicationUser.FullName,
+                    Email = ProductUserViewModel.ApplicationUser.Email,
+                    PhoneNumber = ProductUserViewModel.ApplicationUser.PhoneNumber,
+                    OrderDate = DateTime.Now,
+                    OrderStatus = WC.OrderStatusPending
                 };
 
-                _inquiryDetailRepository.Add(inquiryDetail);
+                _orderHeaderRepository.Add(orderHeader);
+                _orderHeaderRepository.Save();
 
+                foreach (var prod in ProductUserViewModel.ProductList)
+                {
+                    OrderDetail orderDetail = new OrderDetail()
+                    {
+                        OrderHeaderId = orderHeader.Id,
+                        PricePerSqFt = (double)prod.Price,
+                        Sqft = prod.TempSqFt,
+                        ProductId = prod.Id
+                    };
+
+                    _orderDetailRepository.Add(orderDetail);
+                }
+
+                _orderDetailRepository.Save();
+                return RedirectToAction(nameof(InquiryConfirmation), new { });
+            }
+            else
+            {
+                var pathToTemplate = _webHostEnvironment.WebRootPath + Path.DirectorySeparatorChar.ToString() + "templates" + Path.DirectorySeparatorChar.ToString() + "Inquiry.html";
+                var subject = "New Inquiry";
+                string htmlBody = "";
+                using (StreamReader sr = System.IO.File.OpenText(pathToTemplate))
+                {
+                    htmlBody = sr.ReadToEnd();
+                }
+
+                StringBuilder productListSB = new StringBuilder();
+                foreach (var prod in productUserViewModel.ProductList)
+                {
+                    productListSB.Append($" - Name: {prod.Name} <span style='font-size 14px'>(ID: {prod.Id})</span> <br />");
+                }
+
+                string messageBody = string.Format(htmlBody,
+                    productUserViewModel.ApplicationUser.FullName,
+                    productUserViewModel.ApplicationUser.Email,
+                    productUserViewModel.ApplicationUser.PhoneNumber,
+                    productListSB.ToString());
+
+                await _emailSender.SendEmailAsync(WC.AdminEmail, subject, messageBody);
+
+                InquiryHeader inquiryHeader = new InquiryHeader()
+                {
+                    ApplicationUserId = claim.Value,
+                    FullName = productUserViewModel.ApplicationUser.FullName,
+                    Email = productUserViewModel.ApplicationUser.Email,
+                    PhoneNumber = productUserViewModel.ApplicationUser.PhoneNumber,
+                    InquiryDate = DateTime.Now
+                };
+
+                _inquiryHeaderRepository.Add(inquiryHeader);
+                _inquiryHeaderRepository.Save();
+
+                foreach (var prod in ProductUserViewModel.ProductList)
+                {
+                    InquiryDetail inquiryDetail = new InquiryDetail()
+                    {
+                        InquiryHeaderId = inquiryHeader.Id,
+                        ProductId = prod.Id
+                    };
+
+                    _inquiryDetailRepository.Add(inquiryDetail);
+
+                }
+
+                _inquiryDetailRepository.Save();
             }
 
-            _inquiryDetailRepository.Save();
             return RedirectToAction(nameof(InquiryConfirmation));
         }
 
@@ -229,7 +279,7 @@ namespace Rocky.Controllers
         {
             List<ShoppingCart> shoppingCarts = new List<ShoppingCart>();
 
-            foreach(var prod in products)
+            foreach (var prod in products)
             {
                 shoppingCarts.Add(new ShoppingCart { ProductId = prod.Id, SqFt = prod.TempSqFt });
             }
