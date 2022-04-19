@@ -155,16 +155,10 @@ namespace Rocky.Controllers
 
             if (User.IsInRole(WC.AdminRole))
             {
-                var orderTotal = 0.0m;
-                foreach (var prod in ProductUserViewModel.ProductList)
-                {
-                    orderTotal += prod.Price + prod.TempSqFt;
-                }
-
                 OrderHeader orderHeader = new OrderHeader()
                 {
                     CreatedByUserId = claim.Value,
-                    FinalOrderTotal = (double)orderTotal,
+                    FinalOrderTotal = (double)ProductUserViewModel.ProductList.Sum(x => x.TempSqFt * x.Price),
                     City = ProductUserViewModel.ApplicationUser.City,
                     StreetAddress = ProductUserViewModel.ApplicationUser.StreetAddress,
                     State = ProductUserViewModel.ApplicationUser.State,
