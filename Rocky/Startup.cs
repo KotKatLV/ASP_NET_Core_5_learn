@@ -10,6 +10,7 @@ using Rocky.DAL;
 using Rocky.DAL.Repository;
 using Rocky.DAL.Repository.Interfaces;
 using Rocky.Utils;
+using Rocky.Utils.BrainTree;
 using System;
 
 namespace Rocky
@@ -46,6 +47,8 @@ namespace Rocky
                 Options.Cookie.IsEssential = true;
             });
 
+            services.Configure<BrainTreeSettinngs>(Configuration.GetSection("BrainTree"));
+            services.AddSingleton<IBrainTreeGate, BrainTreeGate>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IApplicationTypeRepository, ApplicationTypeRepository>();
