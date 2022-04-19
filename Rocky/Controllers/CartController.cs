@@ -85,10 +85,35 @@ namespace Rocky.Controllers
         [HttpGet]
         public IActionResult Summary()
         {
-            var claimsIdentity = (ClaimsIdentity)User.Identity;
-            var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+            ApplicationUser applicationUser;
 
-            //var userId = User.FindFirstValue(ClaimTypes.Name);
+            if (User.IsInRole(WC.AdminRole))
+            {
+                if (HttpContext.Session.Get<int>(WC.SessionInquiryId) != 0)
+                {
+                    // cart has been loaded using inquiry
+                    InquiryHeader inquiryHeader = _inquiryHeaderRepository.FirstOrDefault(u => u.Id == HttpContext.Session.Get<int>(WC.SessionInquiryId));
+                    applicationUser = new ApplicationUser
+                    {
+                        FullName = inquiryHeader.FullName,
+                        Email = inquiryHeader.Email,
+                        PhoneNumber = inquiryHeader.PhoneNumber
+                    };
+                }
+                else
+                {
+                    applicationUser = new ApplicationUser();
+                }
+            }
+            else
+            {
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
+
+                //var userId = User.FindFirstValue(ClaimTypes.Name);
+
+                applicationUser = _applicationUserRepository.FirstOrDefault(u => u.Id == claim.Value);
+            }
 
             List<ShoppingCart> shoppingCarts = new List<ShoppingCart>();
             if (HttpContext.Session.Get<IEnumerable<ShoppingCart>>(WC.SessionCart) != null
@@ -103,13 +128,12 @@ namespace Rocky.Controllers
 
             ProductUserViewModel = new ProductUserViewModel
             {
-                ApplicationUser = _applicationUserRepository.FirstOrDefault(u => u.Id == claim.Value),
+                ApplicationUser = applicationUser,
                 ProductList = productList.ToList(),
             };
 
             return View(ProductUserViewModel);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
