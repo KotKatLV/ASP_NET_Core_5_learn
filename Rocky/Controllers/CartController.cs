@@ -129,8 +129,14 @@ namespace Rocky.Controllers
             ProductUserViewModel = new ProductUserViewModel
             {
                 ApplicationUser = applicationUser,
-                ProductList = productList.ToList(),
             };
+
+            foreach (var cartObj in shoppingCarts)
+            {
+                Product prodTemp = _productRepository.FirstOrDefault(u => u.Id == cartObj.ProductId);
+                prodTemp.TempSqFt = cartObj.SqFt;
+                ProductUserViewModel.ProductList.Add(prodTemp);
+            }
 
             return View(ProductUserViewModel);
         }
