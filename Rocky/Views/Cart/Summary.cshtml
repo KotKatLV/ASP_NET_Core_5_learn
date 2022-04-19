@@ -29,7 +29,7 @@
                                         <label>Name</label>
                                     </div>
                                     <div class="col-9">
-                                        <input asp-for="ApplicationUser.FullName" type="text" class="form-control" />
+                                        <input asp-for="ApplicationUser.FullName" type="text" required class="form-control" />
                                         <span asp-validation-for="ApplicationUser.FullName" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -38,7 +38,7 @@
                                         <label>Phone</label>
                                     </div>
                                     <div class="col-9">
-                                        <input asp-for="ApplicationUser.PhoneNumber" type="text" class="form-control" />
+                                        <input asp-for="ApplicationUser.PhoneNumber" type="text" required class="form-control" />
                                         <span asp-validation-for="ApplicationUser.PhoneNumber" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                                         <label>Email</label>
                                     </div>
                                     <div class="col-9">
-                                        <input asp-for="ApplicationUser.Email" type="text" class="form-control" />
+                                        <input asp-for="ApplicationUser.Email" type="text" required class="form-control" />
                                         <span asp-validation-for="ApplicationUser.Email" class="text-danger"></span>
                                     </div>
                                 </div>
@@ -137,7 +137,14 @@
                 <div class="card-footer">
                     <div class="row">
                         <div class="col-12 col-md-5 offset-md-7">
-                            <button type="submit" class="btn btn-primary form-control">Submit Inquiry</button>
+                            @if (User.IsInRole(WC.AdminRole))
+                            {
+                                <button id="submit-button" class="btn btn-success form-control">Submit Order</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-primary form-control">Submit Inquiry</button>
+                            }
                         </div>
                     </div>
                 </div>
