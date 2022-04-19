@@ -155,7 +155,7 @@ namespace Rocky.Controllers
 
             if (User.IsInRole(WC.AdminRole))
             {
-                OrderHeader orderHeader = new OrderHeader()
+                OrderHeader orderHeader = new()
                 {
                     CreatedByUserId = claim.Value,
                     FinalOrderTotal = (double)ProductUserViewModel.ProductList.Sum(x => x.TempSqFt * x.Price),
@@ -187,7 +187,7 @@ namespace Rocky.Controllers
                 }
 
                 _orderDetailRepository.Save();
-                return RedirectToAction(nameof(InquiryConfirmation), new { });
+                return RedirectToAction(nameof(InquiryConfirmation), new { id = orderHeader.Id });
             }
             else
             {
@@ -243,10 +243,11 @@ namespace Rocky.Controllers
             return RedirectToAction(nameof(InquiryConfirmation));
         }
 
-        public IActionResult InquiryConfirmation(ProductUserViewModel productUserViewModel)
+        public IActionResult InquiryConfirmation(int id = 0)
         {
+            OrderHeader orderHeader = _orderHeaderRepository.FirstOrDefault(u => u.Id == id);
             HttpContext.Session.Clear();
-            return View();
+            return View(orderHeader);
         }
 
         public IActionResult Remove(int id)
