@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Braintree;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -155,7 +156,7 @@ namespace Rocky.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Summary")]
-        public async Task<IActionResult> SummaryPostAsync(ProductUserViewModel productUserViewModel)
+        public async Task<IActionResult> SummaryPostAsync(IFormCollection collection, ProductUserViewModel productUserViewModel)
         {
             var clainsIdentity = (ClaimsIdentity)User.Identity;
             var claim = clainsIdentity.FindFirst(ClaimTypes.NameIdentifier);
@@ -194,6 +195,34 @@ namespace Rocky.Controllers
                 }
 
                 _orderDetailRepository.Save();
+
+                string nonceFromTheClient = collection["payment_method_nonce"];
+
+                var request = new TransactionRequest
+                {
+                    Amount = (decimal)orderHeader.FinalOrderTotal,
+                    PaymentMethodNonce = nonceFromTheClient,
+                    OrderId = orderHeader.Id.ToString(),
+                    Options = new TransactionOptionsRequest
+                    {
+                        SubmitForSettlement = true
+                    }
+                };
+
+                var gateway = _brainTree.GetGateWay();
+                Result<Transaction> result = gateway.Transaction.Sale(request);
+
+                if (result.Target.ProcessorResponseText == "Approved")
+                {
+                    orderHeader.TransactionId = result.Target.Id;
+                    orderHeader.OrderStatus = WC.OrderStatusApproved;
+                }
+                else
+                {
+                    orderHeader.OrderStatus = WC.OrderStatusCancelled;
+                }
+
+                _orderHeaderRepository.Save();
                 return RedirectToAction(nameof(InquiryConfirmation), new { id = orderHeader.Id });
             }
             else
