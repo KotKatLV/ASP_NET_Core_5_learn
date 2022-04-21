@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Rocky.Domain;
+using Rocky.Utils;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Rocky.DAL.Initializer
 {
@@ -21,7 +21,40 @@ namespace Rocky.DAL.Initializer
 
         public void Initialize()
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (_db.Database.GetPendingMigrations().Any())
+                {
+                    _db.Database.Migrate();
+                }
+
+                if (!_roleManager.RoleExistsAsync(WC.AdminRole).GetAwaiter().GetResult())
+                {
+                    _roleManager.CreateAsync(new IdentityUser(WC.AdminRole)).GetAwaiter().GetResult();
+                    _roleManager.CreateAsync(new IdentityUser(WC.CustomerRole)).GetAwaiter().GetResult();
+                }
+                else
+                {
+                    return;
+                }
+
+                _userManager.CreateAsync(new ApplicationUser
+                {
+                    UserName = "admin@gmail.com",
+                    Email = "admin@gmail.com",
+                    EmailConfirmed = true,
+                    FullName = "Admin admin",
+                    PhoneNumber = "123",
+                    PhoneNumberConfirmed = true
+                }, "hZaYNU*5zWD8H6Y").GetAwaiter().GetResult();
+
+                ApplicationUser user = _db.ApplicationUser.FirstOrDefault(u => u.Email == "admin@gmail.com");
+                _userManager.AddToRoleAsync(user, WC.AdminRole).GetAwaiter().GetResult();
+            }
+            catch(Exception exp)
+            {
+
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Rocky.DAL;
+using Rocky.DAL.Initializer;
 using Rocky.DAL.Repository;
 using Rocky.DAL.Repository.Interfaces;
 using Rocky.Utils;
@@ -57,6 +58,7 @@ namespace Rocky
             services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
             services.AddScoped<IOrderHeaderRepository, OrderHeaderRepository>();
             services.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+            services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddAuthentication().AddFacebook(Options => 
             {
                 Options.AppId = "1201709160566232";
@@ -66,7 +68,7 @@ namespace Rocky
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDbInitializer dbInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -86,6 +88,7 @@ namespace Rocky
 
             app.UseAuthentication();
             app.UseAuthorization();
+            dbInitializer.Initialize();
             app.UseSession();
             app.UseEndpoints(endpoints =>
             {
