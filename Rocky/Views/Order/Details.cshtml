@@ -1,4 +1,5 @@
-﻿@model Rocky.UI.Web.ViewModels.OrderViewModel
+﻿@using Rocky.Utils
+@model Rocky.UI.Web.ViewModels.OrderViewModel
 
 <form method="post">
     <input asp-for="OrderHeader.Id" hidden />
@@ -145,18 +146,27 @@
 
                             <br />
 
-                            <input type="submit" value="Start Processing" class="btn btn-info form-control" />
+                            @if (Model.OrderHeader.OrderStatus == WC.OrderStatusApproved)
+                            {
+                                <input type="submit" value="Start Processing" formmethod="post" asp-action="StartProcessing" class="btn btn-info form-control" />
+                            }
 
-                            <input type="submit" value="Ship Order" class="btn btn-primary form-control" />
+                            @if (Model.OrderHeader.OrderStatus == WC.OrderStatusProcessing)
+                            {
+                                <input type="submit" value="Ship Order" formmethod="post" asp-action="ShipOrder" class="btn btn-primary form-control" />
+                            }
 
-
-                            <div class="pt-2">
-                                <button type="submit"
-                                        class="btn btn-danger form-control"
-                                        formmethod="post">
-                                    Cancel Order
-                                </button>
-                            </div>
+                            @if (Model.OrderHeader.OrderStatus != WC.OrderStatusRefunded && Model.OrderHeader.OrderStatus != WC.OrderStatusCancelled)
+                            {
+                                <div class="pt-2">
+                                    <button type="submit"
+                                            class="btn btn-danger form-control"
+                                            asp-action="CancelOrder"
+                                            formmethod="post">
+                                        Cancel Order
+                                    </button>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -166,13 +176,13 @@
 </form>
 
 @section Scripts{
-    <partial name="_ValidationScriptsPartial"/>
-    <script>
-        $(document).ready(function (){
-            var shippingDate = document.getElementById("shippingDate");
-            if (shippingDate.value == "1/1/0001") {
-                shippingDate.value = "";
-            }
-        })
-    </script>
+<partial name="_ValidationScriptsPartial" />
+<script>
+    $(document).ready(function (){
+        var shippingDate = document.getElementById("shippingDate");
+        if (shippingDate.value == "1/1/0001") {
+            shippingDate.value = "";
+        }
+    })
+</script>
 }
