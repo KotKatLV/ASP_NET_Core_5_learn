@@ -82,6 +82,7 @@ namespace Rocky.UI.Web.Controllers
             OrderHeader orderHeader = _orderHeaderRepository.FirstOrDefault(u => u.Id == OrderViewModel.OrderHeader.Id);
             orderHeader.OrderStatus = WC.OrderStatusProcessing;
             _orderHeaderRepository.Save();
+            TempData[WC.SuccessNotification] = "Order start processing successfully";
             return RedirectToAction(nameof(Index));
         }
 
@@ -93,6 +94,7 @@ namespace Rocky.UI.Web.Controllers
             orderHeader.OrderStatus = WC.OrderStatusShipped;
             orderHeader.ShippingDate = DateTime.Now;
             _orderHeaderRepository.Save();
+            TempData[WC.SuccessNotification] = "Order shipped successfully";
             return RedirectToAction(nameof(Index));
         }
 
@@ -117,7 +119,25 @@ namespace Rocky.UI.Web.Controllers
 
             orderHeader.OrderStatus = WC.OrderStatusRefunded;
             _orderHeaderRepository.Save();
+            TempData[WC.SuccessNotification] = "Order cancelled successfully";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateOrderDetails()
+        {
+            OrderHeader orderHeaderFromDb = _orderHeaderRepository.FirstOrDefault(u => u.Id == OrderViewModel.OrderHeader.Id);
+            orderHeaderFromDb.FullName = OrderViewModel.OrderHeader.FullName;
+            orderHeaderFromDb.PhoneNumber = OrderViewModel.OrderHeader.PhoneNumber;
+            orderHeaderFromDb.StreetAddress = OrderViewModel.OrderHeader.StreetAddress;
+            orderHeaderFromDb.City = OrderViewModel.OrderHeader.City;
+            orderHeaderFromDb.PostalCode = OrderViewModel.OrderHeader.PostalCode;
+            orderHeaderFromDb.Email = OrderViewModel.OrderHeader.Email;
+
+            _orderHeaderRepository.Save();
+            TempData[WC.SuccessNotification] = "Order details updated successfully";
+            return RedirectToAction("Details", "Order", new { id = orderHeaderFromDb.Id });
         }
     }
 }
