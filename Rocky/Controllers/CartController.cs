@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Rocky.DAL.Repository.Interfaces;
 using Rocky.Domain;
 using Rocky.Utils;
+using Rocky.Utils.BrainTree;
 using Rocky.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -29,11 +30,12 @@ namespace Rocky.Controllers
         private readonly IOrderDetailRepository _orderDetailRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IEmailSender _emailSender;
+        private readonly IBrainTreeGate _brainTree;
 
         [BindProperty]
         public ProductUserViewModel ProductUserViewModel { get; set; }
 
-        public CartController(IWebHostEnvironment webHostEnvironment, IEmailSender emailSender, IProductRepository productRepository, IApplicationTypeRepository applicationTypeRepository, IApplicationUserRepository applicationUserRepository, IInquiryDetailRepository inquiryDetailRepository, IInquiryHeaderRepository inquiryHeaderRepository, IOrderDetailRepository orderDetailRepository, IOrderHeaderRepository orderHeaderRepository)
+        public CartController(IWebHostEnvironment webHostEnvironment, IEmailSender emailSender, IProductRepository productRepository, IApplicationTypeRepository applicationTypeRepository, IApplicationUserRepository applicationUserRepository, IInquiryDetailRepository inquiryDetailRepository, IInquiryHeaderRepository inquiryHeaderRepository, IOrderDetailRepository orderDetailRepository, IOrderHeaderRepository orderHeaderRepository, IBrainTreeGate brainTree)
         {
             _productRepository = productRepository;
             _applicationTypeRepository = applicationTypeRepository;
@@ -44,6 +46,7 @@ namespace Rocky.Controllers
             _emailSender = emailSender;
             _orderDetailRepository = orderDetailRepository;
             _orderHeaderRepository = orderHeaderRepository;
+            _brainTree = brainTree;
         }
 
         public IActionResult Index()
@@ -108,6 +111,10 @@ namespace Rocky.Controllers
                 {
                     applicationUser = new ApplicationUser();
                 }
+
+                var gateWay = _brainTree.GetGateWay();
+                var clientToken = gateWay.ClientToken.Generate();
+                ViewBag.ClientToken = clientToken;
             }
             else
             {

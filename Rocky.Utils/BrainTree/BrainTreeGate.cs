@@ -21,7 +21,7 @@ namespace Rocky.Utils.BrainTree
 
         public IBraintreeGateway GetGateWay()
         {
-            if (BrainTreeGateWay != null)
+            if (BrainTreeGateWay == null)
             {
                 BrainTreeGateWay = CreateGateWay();
             }
