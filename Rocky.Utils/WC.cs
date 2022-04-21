@@ -1,4 +1,7 @@
-﻿namespace Rocky.Utils
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+
+namespace Rocky.Utils
 {
     public static class WC
     {
@@ -23,5 +26,11 @@
         public const string OrderStatusShipped = "Shipped";
         public const string OrderStatusCancelled = "Cancelled";
         public const string OrderStatusRefunded = "Refunded";
+
+        public static readonly IEnumerable<string> listStatus = new ReadOnlyCollection<string>(
+            new List<string>
+            {
+                OrderStatusApproved, OrderStatusCancelled, OrderStatusProcessing, OrderStatusRefunded, OrderStatusShipped
+            });
     }
 }
