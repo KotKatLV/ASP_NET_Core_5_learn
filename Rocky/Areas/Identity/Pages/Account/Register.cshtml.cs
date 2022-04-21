@@ -101,6 +101,7 @@ namespace Rocky.Areas.Identity.Pages.Account
                     }
                     else
                     {
+
                         await _userManager.AddToRoleAsync(user, WC.CustomerRole);
                     }
 
@@ -130,8 +131,16 @@ namespace Rocky.Areas.Identity.Pages.Account
                         }
                         else
                         {
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-                            return LocalRedirect(returnUrl);
+                            if (User.IsInRole(WC.AdminRole))
+                            {
+                                TempData[WC.SuccessNotification] = user.FullName + " has been registered";
+                                return RedirectToAction("Index", "Home");
+                            }
+                            else
+                            {
+                                await _signInManager.SignInAsync(user, isPersistent: false);
+                                return LocalRedirect(returnUrl);
+                            }
                         }
 
                     }
