@@ -21,7 +21,7 @@ namespace Rocky.UI.Web.Controllers
             _brainTree = brainTree;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string searchName, string searchEmail, string searchPhone, string Status)
         {
             OrderListViewModel orderListView = new OrderListViewModel()
             {
@@ -32,6 +32,26 @@ namespace Rocky.UI.Web.Controllers
                     Value = i
                 })
             };
+
+            if (string.IsNullOrEmpty(searchName))
+            {
+                orderListView.OrderHList = orderListView.OrderHList.Where(u => u.FullName.ToLower().Contains(searchName.ToLower()));
+            }
+
+            if (string.IsNullOrEmpty(searchEmail))
+            {
+                orderListView.OrderHList = orderListView.OrderHList.Where(u => u.Email.ToLower().Contains(searchEmail.ToLower()));
+            }
+
+            if (string.IsNullOrEmpty(searchPhone))
+            {
+                orderListView.OrderHList = orderListView.OrderHList.Where(u => u.PhoneNumber.ToLower().Contains(searchPhone.ToLower()));
+            }
+
+            if (string.IsNullOrEmpty(Status) && Status != "--Order Status--")
+            {
+                orderListView.OrderHList = orderListView.OrderHList.Where(u => u.OrderStatus.ToLower().Contains(Status.ToLower()));
+            }
 
             return View(orderListView);
         }
