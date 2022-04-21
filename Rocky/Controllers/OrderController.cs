@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Braintree;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Rocky.DAL.Repository.Interfaces;
+using Rocky.Domain;
 using Rocky.UI.Web.ViewModels;
 using Rocky.UI.Web.VIewModels;
 using Rocky.Utils;
 using Rocky.Utils.BrainTree;
+using System;
 using System.Linq;
 
 namespace Rocky.UI.Web.Controllers
@@ -72,5 +75,49 @@ namespace Rocky.UI.Web.Controllers
             return View(OrderViewModel);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult StartProcessing()
+        {
+            OrderHeader orderHeader = _orderHeaderRepository.FirstOrDefault(u => u.Id == OrderViewModel.OrderHeader.Id);
+            orderHeader.OrderStatus = WC.OrderStatusProcessing;
+            _orderHeaderRepository.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ShipOrder()
+        {
+            OrderHeader orderHeader = _orderHeaderRepository.FirstOrDefault(u => u.Id == OrderViewModel.OrderHeader.Id);
+            orderHeader.OrderStatus = WC.OrderStatusShipped;
+            orderHeader.ShippingDate = DateTime.Now;
+            _orderHeaderRepository.Save();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CancelOrder()
+        {
+            OrderHeader orderHeader = _orderHeaderRepository.FirstOrDefault(u => u.Id == OrderViewModel.OrderHeader.Id);
+            var gateway = _brainTree.GetGateWay();
+            Transaction transaction = gateway.Transaction.Find(orderHeader.TransactionId);
+
+            if (transaction.Status == TransactionStatus.AUTHORIZED || transaction.Status == TransactionStatus.SUBMITTED_FOR_SETTLEMENT)
+            {
+                // not refund
+                Result<Transaction> resultVoid = gateway.Transaction.Void(orderHeader.TransactionId);
+            }
+            else
+            {
+                // refund
+                Result<Transaction> resultRefund = gateway.Transaction.Refund(orderHeader.TransactionId);
+            }
+
+            orderHeader.OrderStatus = WC.OrderStatusRefunded;
+            _orderHeaderRepository.Save();
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
